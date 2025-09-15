@@ -1,4 +1,4 @@
-# Caf-Daily-Sales-Reporting---Serverless-Architecture
+# Cafe-Daily-Sales-Reporting---Serverless-Architecture
 Café Daily Sales Reporting - Serverless Architecture
 
 ## Overview
