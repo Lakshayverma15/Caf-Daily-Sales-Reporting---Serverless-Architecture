@@ -1,0 +1,95 @@
+1️⃣ salesAnalysisReportDataExtractor Lambda
+
+Purpose:
+This Lambda function connects to the RDS database and extracts the café’s daily sales data. Its job is purely to fetch data, not to format or send it.
+
+How it works:
+
+Input parameters (from the Lambda event):
+
+dbUrl, dbName, dbUser, dbPassword – database connection details.
+
+Database connection:
+
+Uses pymysql to connect to the RDS MySQL database in the VPC.
+
+Configures the cursor to return results as Python dictionaries.
+
+SQL Query:
+
+Queries tables order_item, product, and product_group to get:
+
+product_group_number
+
+product_group_name
+
+product_id
+
+product_name
+
+quantity sold (sum of all orders per product)
+
+Groups results by product and product group.
+
+Close connection:
+
+Closes the RDS connection after fetching data.
+
+Return:
+
+Returns a JSON object containing the query results (statusCode 200 and body with sales data).
+
+Summary:
+
+A data-extraction Lambda that securely connects to the RDS database in a VPC, runs a query to retrieve daily sales per product, and returns the results as structured JSON.
+
+2️⃣ salesAnalysisReport Lambda
+
+Purpose:
+This Lambda function generates a human-readable daily sales report and sends it via SNS email. It relies on the first Lambda to get the raw data.
+
+How it works:
+
+Environment Variables:
+
+topicARN – ARN of the SNS topic for sending the report.
+
+AWS_REGION – Lambda’s region.
+
+Retrieve database secrets:
+
+Uses AWS Secrets Manager to fetch database credentials (dbUrl, dbName, dbUser, dbPassword).
+
+Invoke DataExtractor Lambda:
+
+Calls salesAnalysisReportDataExtractor Lambda synchronously to get the latest sales data.
+
+Process the report data:
+
+Iterates over the data returned by the DataExtractor.
+
+Formats it into a text-based report with:
+
+Product group headers
+
+Product name
+
+Quantity sold
+
+Proper spacing/tabs to align columns
+
+If no data exists, prints: "There were no orders today."
+
+Send report via SNS:
+
+Creates an SNS client and publishes the formatted report to the topic.
+
+Email subscribers (Frank and Martha) receive the daily report.
+
+Return:
+
+Returns a status message confirming the report was sent.
+
+Summary:
+
+A reporting Lambda that generates a formatted sales report from extracted data and sends it via SNS email. It handles formatting, grouping, and delivery, providing an automated daily report to café owners.
